@@ -1,2 +1,5 @@
 /knowledge/.venv/
+/knowledge/__pycache__/
+/knowledge/processor/__pycache__/
+knowledge/processor/import_processor/__pycache__/
 .idea
