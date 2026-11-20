@@ -2,5 +2,7 @@
 /knowledge/__pycache__/
 /knowledge/processor/__pycache__/
 knowledge/processor/import_processor/__pycache__/
+/knowledge/utils/__pycache__/
+/knowledge/utils/client/__pycache__/
 /knowledge/.env
 .idea

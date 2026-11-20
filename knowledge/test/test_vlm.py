@@ -7,7 +7,7 @@ load_dotenv()
 # 初始化OpenAI客户端
 client = OpenAI(
     api_key = os.getenv("OPENAI_API_KEY"),
-    base_url=os.getenv("OPENAI_AI_BASE")
+    base_url=os.getenv("OPENAI_API_BASE")
 )
 # 创建聊天完成请求
 completion = client.chat.completions.create(

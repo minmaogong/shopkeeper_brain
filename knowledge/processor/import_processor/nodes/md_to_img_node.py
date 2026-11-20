@@ -10,7 +10,7 @@ from pathlib import Path
 from openai import OpenAI
 
 from knowledge.processor.import_processor.base import BaseNode, setup_logging, T
-from knowledge.processor.import_processor.state import ImportGraphState
+from knowledge.processor.import_processor.state import ImportGraphState, create_default_state
 from knowledge.processor.import_processor.exceptions import StateFieldError, FileProcessingError
 from knowledge.utils.client.ai_clients import AIClients
 
@@ -138,7 +138,7 @@ class _ImageScanner:
         for img_path in img_dir_obj.iterdir():
 
             # 1.1 过滤掉子目录
-            if not img_path.is_fifo():
+            if not img_path.is_file():
                 self.logger.error(f"{img_path}不是一个有效的文件")
                 continue
 
@@ -339,6 +339,7 @@ class _VLMSummarizer:
         try:
             vlm_client = AIClients.get_openai()
         except Exception as e:
+            self.logger.error(f"获取VLM客户端失败: {e}")
             # 兼容
             for img_info in img_info_list:
                 summaries[img_info.name] = "暂无摘要"
@@ -499,3 +500,13 @@ class MarkDownToImgNode(BaseNode):
         # 4. 操作image_uploader
         self.log_step("step4", "开始上传图片到Minio")
         return state
+
+if __name__ == "__main__":
+    setup_logging()
+    md_img_node = MarkDownToImgNode()
+
+    init_state = create_default_state(
+        md_path=r"../temp_dir/万用表的使用/markdown.md"
+    )
+
+    md_img_node.process(init_state)
