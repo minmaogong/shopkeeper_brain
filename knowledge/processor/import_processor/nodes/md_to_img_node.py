@@ -472,7 +472,7 @@ class _ImageUploader:
         remote_urls = self._upload_all(object_dir_name, img_info_list, minio_base_url, minio_bucket_name)
 
         # 2. 更新
-        md_content = self._update_md_content(md_content, summaries, remote_urls)
+        md_content = self._update_md(md_content, summaries, remote_urls)
         return md_content
 
     def _upload_all(self, object_dir_name: str, img_info_list: List[ImageInfo], minio_base_url: str, minio_bucket_name: str) -> Dict[str, str]:
@@ -503,7 +503,7 @@ class _ImageUploader:
         self.logger.info(f"获取到远程图片地址: {remote_urls}")
         return remote_urls
 
-    def _update_md_content(self, md_content: str, summaries: Dict[str, str], remote_urls: Dict[str, str]) -> str:
+    def _update_md(self, md_content: str, summaries: Dict[str, str], remote_urls: Dict[str, str]) -> str:
         """
         更新MD中的图片描述和远程图片地址
         Args:
@@ -515,7 +515,27 @@ class _ImageUploader:
             更新后的MD内容
 
         """
-        # TODO(利用正则寻找)
+        # 利用正则寻找(捕获组：()一个捕获组：group(0): 存储整个匹配到的内容 group(1): 图片的摘要 group(2): 图片地址)
+        pattern = re.compile(r'!\[(.*?)\]\((.*?)\)') # 匹配 ![图片描述](图片地址) 的正则表达式，(.*?) 表示捕获匹配了括号内表达式要求的内容
+
+        def replacer(match: re.Match) -> str:
+            """
+
+            Args:
+                match:
+
+            Returns:
+                ![摘要](远程图片地址)
+            """
+            origin_img_path = match.group(2)  # MD内容中匹配到正则表达式的图片地址
+            img_name_in_md = Path(origin_img_path).name
+            for img_name, img_summary in summaries.items():
+
+                if img_name == img_name_in_md:
+                    return f"![{img_summary}]({remote_urls[img_name_in_md]})"
+            return match.group(0)  # 如果没有匹配到，返回原来的内容
+
+        return pattern.sub(replacer, md_content)  # 替换所有匹配到的内容
 
 
 class MarkDownToImgNode(BaseNode):
