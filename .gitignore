@@ -5,4 +5,5 @@ knowledge/processor/import_processor/__pycache__/
 /knowledge/utils/__pycache__/
 /knowledge/utils/client/__pycache__/
 /knowledge/.env
+/knowledge/processor/import_processor/nodes/__pycache__/
 .idea

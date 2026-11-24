@@ -43,7 +43,7 @@ CE
 
 ## 安全标识
 
-![警告标识：注意危险电压风险](http://192.168.64.150:9000/knowledge-base-v1/markdown/page_1_image_13.jpg)
+![危险电压警告标识](http://192.168.64.150:9000/knowledge-base-v1/markdown/page_1_image_13.jpg)
 
 表明此操作须参照说明书进行。
 
@@ -51,7 +51,7 @@ CE
 
 <strong><u>CAUTION</u></strong>表明此处可能出现危险电压，请避开以免导致仪表的损坏。
 
-![最大输入电压警示标识](http://192.168.64.150:9000/knowledge-base-v1/markdown/page_1_image_17.jpg)
+![最大输入电压限制标识](http://192.168.64.150:9000/knowledge-base-v1/markdown/page_1_image_17.jpg)
 
 请勿连接到500VAC或VDC的电路上。
 
@@ -59,7 +59,7 @@ CE
 
 表明此端口可能出现危险电压。
 
-![双层边框安全标识符号（表示双绝缘保护）](http://192.168.64.150:9000/knowledge-base-v1/markdown/page_1_image_21.jpg)
+![双层边框安全标识（表示双绝缘保护）](http://192.168.64.150:9000/knowledge-base-v1/markdown/page_1_image_21.jpg)
 
 双绝缘保护。
 
@@ -223,7 +223,7 @@ BAT 电池电量不足指示
 
 7. 在显示屏上读取读数。进行mA DC测量时,不断重调功能转盘至低mA DC档位获得高分辨率读数.读数由精确的小数点和数值表示。
 
-![直流电流测量接线示意图：万用表串联接入电路测负载电流](http://192.168.64.150:9000/knowledge-base-v1/markdown/page_4_image_29.jpg)
+![直流电流测量接线示意图](http://192.168.64.150:9000/knowledge-base-v1/markdown/page_4_image_29.jpg)
 
 ## 电阻测量
 
@@ -237,7 +237,7 @@ BAT 电池电量不足指示
 
 4. 读取显示屏上读数，然后将功能转盘调至最低电阻Ω档位，通常大于实际电阻或预测电阻.读数由精确的小数点和数值表示。
 
-![数字万用表测量电阻接线示意图](http://192.168.64.150:9000/knowledge-base-v1/markdown/page_5_image_10.jpg)
+![数字万用表测量电阻的接线与读数示意图](http://192.168.64.150:9000/knowledge-base-v1/markdown/page_5_image_10.jpg)
 
 ## 短路蜂鸣测试
 
