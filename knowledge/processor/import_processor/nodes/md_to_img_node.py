@@ -11,7 +11,7 @@ from openai import OpenAI
 
 from knowledge.processor.import_processor.base import BaseNode, setup_logging, T
 from knowledge.processor.import_processor.state import ImportGraphState, create_default_state
-from knowledge.processor.import_processor.exceptions import StateFieldError, FileProcessingError
+from knowledge.processor.import_processor.exceptions import StateFieldError, FileProcessingError, ImageProcessingError
 from knowledge.utils.client.ai_clients import AIClients
 from knowledge.utils.client.storage_clients import StorageClients
 
@@ -94,6 +94,20 @@ class _MdFileHandler:
 
         # 7. 返回
         return md_content, md_path_obj, img_dir
+
+    def backup(self, md_path_obj: Path, new_md_content: str) -> str:
+        new_file_path = md_path_obj.with_name( # with_name() 方法用于创建一个新的 Path 对象，表示与原始 md_path_obj 相同目录下的一个新文件，文件名为原始文件名加上 "_new" 后缀
+            f"{md_path_obj.stem}_new{md_path_obj.suffix}"
+        )
+        try:
+            with open(new_file_path, "w", encoding="utf-8") as f:
+                f.write(new_md_content)
+            self.logger.info(f"处理后的文件已备份至：{new_file_path}")
+        except IOError as e:
+            self.logger.error(f"写入新文件失败 {new_file_path}: {e}")
+            raise ImageProcessingError(f"文件写入失败：{e}", node_name=self.node_name)
+
+        return str(new_file_path)
 
 
 class _ImageScanner:
@@ -586,6 +600,10 @@ class MarkDownToImgNode(BaseNode):
         # 4. 操作image_uploader
         self.log_step("step4", "开始上传图片到Minio")
         new_md_content = self._image_uploader.upload_and_replace(md_path_obj.stem, md_content, img_info_list, summaries, config.get_minio_base_url(), config.minio_bucket)
+
+        # 5. 备份新的md文件
+        self.log_step("step5", "备份新的MD文件")
+        self._md_file_handler.backup(md_path_obj, new_md_content)
 
         return state
 
