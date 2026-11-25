@@ -605,6 +605,8 @@ class MarkDownToImgNode(BaseNode):
         self.log_step("step5", "备份新的MD文件")
         self._md_file_handler.backup(md_path_obj, new_md_content)
 
+        state["md_content"] = new_md_content
+
         return state
 
 if __name__ == "__main__":

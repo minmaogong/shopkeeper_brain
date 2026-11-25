@@ -108,5 +108,5 @@ if __name__ == '__main__':
     final_state = run_import_graph()
     print(json.dumps(final_state, ensure_ascii=False, indent=4))
 
-    # 整个执行的状态图(方便观测)
+    # 整个执行的状态图(方便观测) ascii
     print(import_app.get_graph().print_ascii())
