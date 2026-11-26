@@ -46,6 +46,7 @@ class DocumentSplitNode(BaseNode):
 
     def _split_by_headings(self, md_content: str, file_title: str) -> List[Dict[str, Any]]:
         """
+        parent_title: 封装的原因主要是为了后面短section在合并的时候有一个判断标准（同源：同一个父标题）
         根据标题来切分（# {1,6}都有可能）
         Args:
             md_content: 切分的md
@@ -58,6 +59,8 @@ class DocumentSplitNode(BaseNode):
         body_lines = []
         sections: List[Dict[str, Any]] = [] # 最终收集到的章节列表
         current_title = ""
+        hierarchy = [""] * 7 # 标题层级栈，用于追踪当前标题的层级关系 长度为7，第一个（0）不用
+        current_level = 0
 
         def _flush() -> List[Dict[str, Any]]:
             """
@@ -71,15 +74,25 @@ class DocumentSplitNode(BaseNode):
             Returns:
 
             """
+
             # 1. 处理内容行
             body="\n".join(body_lines).strip()
-            sections.append({
-                "body": body,
-                "title": current_title if current_title else file_title, # 当前内容的标题
-                "parent_title": "",  # 需要根据标题层级来确定父标题
-                "file_title": file_title
-            })
+            if current_title or body:
+                parent_title = ""
+                for i in range(current_level-1, 0, -1):
+                    if hierarchy[i]:
+                        parent_title = hierarchy[i]
+                        break
 
+                if not parent_title:
+                    parent_title = current_title if current_title else file_title
+
+                sections.append({
+                    "body": body,
+                    "title": current_title if current_title else file_title, # 当前内容的标题
+                    "parent_title": parent_title,  # 需要根据标题层级来确定父标题
+                    "file_title": file_title
+                })
 
 
         # 1. 根据\n切分md_content
@@ -100,10 +113,21 @@ class DocumentSplitNode(BaseNode):
             if match: # 匹配到标题
                 # 将body_lines中收集到的行封装到section中
                 _flush()
+
                 current_title = md_line # md_line = match.group(2) # 当前标题的内容
+                level = len(match.group(1)) # 当前标题的层级 （# {1,6}）
+                current_level = level
+                hierarchy[level] = current_title # 更新当前层级的标题
+
+                for i in range(level+1, 7): # 清空当前层级以下的标题
+                    hierarchy[i] = ""
 
             else: # 非标题或者代码块的内容
                 body_lines.append(md_line)
+
+        _flush()
+
+        return sections
 
 
 
