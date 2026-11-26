@@ -25,6 +25,18 @@ class DocumentSplitNode(BaseNode):
         # 2. 切分（一级策略：根据md文档中的标题来切分）多个章节（章节：标题之间的内容）
         sections: List[Dict[str, Any]] = self._split_by_headings(md_content, file_title)
 
+        # 3. 二次切分或者合并
+        self._split_and_merge(sections, max_content_length, min_content_length)
+
+        # 4. 组装成chunk对象
+
+        # 5. 备份（观察）
+
+        # 6. 更新state (chunks)
+
+        # 7. 返回state
+        return state
+
     def _validate_state(self, state: ImportGraphState, config: ImportConfig) -> Tuple[str, str, int, int]:
         self.log_step("step1", "切分文档的参数校验以及获取...")
 
@@ -122,6 +134,8 @@ class DocumentSplitNode(BaseNode):
                 for i in range(level+1, 7): # 清空当前层级以下的标题
                     hierarchy[i] = ""
 
+                body_lines = [] # 清空body_lines，准备收集新的内容
+
             else: # 非标题或者代码块的内容
                 body_lines.append(md_line)
 
@@ -129,7 +143,75 @@ class DocumentSplitNode(BaseNode):
 
         return sections
 
+    def _split_and_merge(self, sections: List[Dict[str, Any]], max_content_length: int, min_content_length: int) -> List[Dict[str, Any]]:
+        """
+        切分较大章节（section）以及合并较小章节（section）
+        Args:
+            sections: 所有经过一级切分后的章节
+            max_content_length: 最大内容长度（content：title+\n\n+body）如果section中的内容长度超过阈值max_content_length，就需要进行切割，反之不需要切割（）尽量保证不要太多的section进行二次切割
+            min_content_length: 最小内容长度：如果section中的内容长度不足阈值min_content_length，就需要对该section进行合并，同源机制合并（section相同的父标题菜合。尽量保证确实比较小的内容才合并，不要把大多数的section都合并了）
 
+        Returns:
+            先切后合
+
+        """
+
+        # 1. 切分
+        current_sections = []
+        for section in sections:
+            current_sections.extend(self._split_long_section(section, max_content_length)) # extend() 方法用于在列表末尾一次性追加另一个序列中的多个值（用新列表扩展原来的列表）。与 append() 方法不同，append() 方法只能添加一个元素，而 extend() 方法可以添加多个元素。
+
+        # 2. 合并
+        final_sections = self._merge_short_section(current_sections, min_content_length)
+
+        return final_sections
+
+    def _split_long_section(self, section: Dict[str, Any], max_content_length: int) -> List[Dict[str, Any]]:
+        """
+        切分长的章节内容
+        Args:
+            section: 当前章节
+            max_content_length: 最大长度阈值
+
+        Returns:
+            List[Dict[str, Any]]: 切分后的章节列表
+
+        """
+
+        # 1. 获取section对象的属性
+        body = section.get("body") # 行内容
+        title = section.get("title") # 标题
+        parent_title = section.get("parent_title") # 父标题
+        file_title = section.get("file_title") # 文件标题
+
+        # 2. 判断当前section的内容长度是否超过阈值
+        title_prefix = f"{title}\n\n"
+        total_length = len(title_prefix) + len(body)
+        if total_length <= max_content_length:
+            return [section]
+
+        # 3. 使用递归切分器切分body内容
+        # 3.1 切分器对象
+
+        # 3.2 切分器对象切分
+
+
+
+
+if __name__ == '__main__':
+
+    document_split_node = DocumentSplitNode()
+
+    md_path = r"../temp_dir/万用表的使用/markdown_new.md"
+
+    with open(md_path, "r", encoding="utf-8") as f:
+        md_content = f.read()
+
+    init_state = {
+        "file_title": "万用表的使用",
+        "md_content": md_content,
+    }
+    document_split_node.process(init_state)
 
 
 
