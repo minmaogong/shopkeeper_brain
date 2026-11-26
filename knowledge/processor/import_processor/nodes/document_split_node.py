@@ -1,6 +1,7 @@
 import re
 from typing import Tuple, List, Dict, Any
 
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 from knowledge.processor.import_processor.base import BaseNode, setup_logging, T
 from knowledge.processor.import_processor.state import ImportGraphState
@@ -190,8 +191,9 @@ class DocumentSplitNode(BaseNode):
         if total_length <= max_content_length:
             return [section]
 
-        # 3. 使用递归切分器切分body内容
-        # 3.1 切分器对象
+        # 3. 使用递归切分器切分body内容 pip install langchain_text_splitters
+        # 3.1 切分器对象 # chunk_size: chunk块的大小 chunk_overlap: 块与块之间的重叠部分的大小 separators: 分割符列表 【"\n\n", "\n", " ", ""】keep_separator: 是否保留分隔符
+        text_splitter = RecursiveCharacterTextSplitter(chunk_size=, chunk_overlap=, separators=, keep_separator=True)
 
         # 3.2 切分器对象切分
 
