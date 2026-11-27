@@ -188,16 +188,60 @@ class DocumentSplitNode(BaseNode):
         # 2. 判断当前section的内容长度是否超过阈值
         title_prefix = f"{title}\n\n"
         total_length = len(title_prefix) + len(body)
-        if total_length <= max_content_length:
+        if total_length <= max_content_length: # 如果当前section的内容长度没有超过阈值，就不需要切分，直接返回当前section
             return [section]
 
-        # 3. 使用递归切分器切分body内容 pip install langchain_text_splitters
-        # 3.1 切分器对象 # chunk_size: chunk块的大小 chunk_overlap: 块与块之间的重叠部分的大小 separators: 分割符列表 【"\n\n", "\n", " ", ""】keep_separator: 是否保留分隔符
-        text_splitter = RecursiveCharacterTextSplitter(chunk_size=, chunk_overlap=, separators=, keep_separator=True)
+        # 3. 计算 body 可用空间
+        body_length = max_content_length - len(title_prefix)
+        if body_length <= 0:
+            return [section] # 防御性编程：title 本身就超长的极端情况
 
-        # 3.2 切分器对象切分
+        # 4. 使用递归切分器切分body内容 pip install langchain_text_splitters
+        # 4.1 切分器对象 # chunk_size: chunk块的大小 chunk_overlap: 块与块之间的重叠部分的大小 separators: 分割符列表 【"\n\n", "\n", " ", ""】keep_separator: 是否保留分隔符
+        text_splitter = RecursiveCharacterTextSplitter(
+            chunk_size=body_length, # 如果正文内容长度len(body) > body_length，就会被切分成多个块，每个块的长度不超过body_length
+            chunk_overlap=0,
+            separators=["\n\n", "\n", "。", "！", "？", "；", ".", "!", "?", ";", " ", ""],
+            keep_separator=True
+        )
 
+        # 4.2 切分器对象切分
+        chunks = text_splitter.split_text(body)
 
+        # 4.3 判断切分后的块数
+        if len(chunks) == 1:
+            return [section]
+
+        # 4.4 遍历
+        sub_sections = []
+        for index, chunk in enumerate(chunks):
+            sub_sections.append({
+                "body": chunk,
+                "title": f'{title}_{index}',
+                "parent_title": parent_title,
+                "file_title": file_title
+            })
+
+        return sub_sections
+
+    def _merge_short_section(self, current_sections: List[Dict[str, Any]], min_content_length: int) -> List[Dict[str, Any]]:
+        """
+        合并短的章节内容：
+        短章节来源：
+        来源1:原本根据一级标题切分之后的内容可能就很短
+        来源2:（Langchain递归切分器）二次切分之后可能有很短的内容
+        合并策略：
+        条件1: section很短，比最小阈值小
+        条件2: 同源（父标题相同）
+        Args:
+            current_sections: Langchain递归切分器切分之后的章节列表
+            min_content_length: 最小内容长度阈值
+
+        Returns:
+            List[Dict[str, Any]]: 合并后的章节列表
+
+            贪心累加算法
+        """
 
 
 if __name__ == '__main__':
